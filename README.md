@@ -14,6 +14,11 @@ python3 odoo-bin --test-enable -d <namadb>
 
 ```
 
+## Testing implementation
+<img width="900" height="739" alt="image" src="https://github.com/user-attachments/assets/3e0266cb-1d1e-465e-b4b0-0d603cff3eed" />
+
+
+
 ## Debug mode (launch.json) && unit test
 ```json
 {
