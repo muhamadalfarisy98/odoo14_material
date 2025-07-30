@@ -1,0 +1,13 @@
+<odoo>
+    <data>
+<menuitem id="menu_material_root"
+              name="Material Management"
+              sequence="10"/>
+
+    <menuitem id="menu_materials_sub"
+              name="Materials"
+              parent="menu_material_root"
+              action="action_material_material"
+              sequence="10"/>
+    </data>
+</odoo>

@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Odoo 14",
+            "type": "python",
+            "request": "launch",
+            "stopOnEntry": false,
+            "python": "/home/farisy/Envs/odoo14/bin/python",
+            "console": "integratedTerminal",
+            "program": "/opt/odoo/odoo14/odoo-bin",
+            "args": [
+                "--config=/opt/odoo/config/odoo14.conf",
+                "--dev=all",
+                // "--test-enable",
+                // "-i", "odoo14_material",
+                // "--test-tags=material_unittest",
+
+
+                // "--stop-after-init",
+                // "--update=odoo14_material",
+                // "--db-filter=odoo14.*"
+            ]
+        }
+    ]
+}

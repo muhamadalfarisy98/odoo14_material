@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="supplier_dummy_1" model="res.partner">
+            <field name="name">PT. Global Fabric Corp</field>
+            <field name="is_company" eval="True"/>
+            <field name="supplier_rank">10</field> <field name="street">Jalan Sudirman No. 100</field>
+            <field name="city">Jakarta</field>
+            <field name="zip">10270</field>
+            <field name="phone">+6221123456</field>
+            <field name="email">contact@globalfabric.com</field>
+        </record>
+
+        <record id="supplier_dummy_2" model="res.partner">
+            <field name="name">CV. Jeans Innovasi</field>
+            <field name="is_company" eval="True"/>
+            <field name="supplier_rank">5</field> <field name="street">Jalan Gatot Subroto No. 50</field>
+            <field name="city">Bandung</field>
+            <field name="zip">40291</field>
+            <field name="phone">+62227654321</field>
+            <field name="email">info@jeansinovasi.co.id</field>
+        </record>
+
+        <record id="supplier_dummy_3" model="res.partner">
+            <field name="name">P.T. Kapas Murni Sejati</field>
+            <field name="is_company" eval="True"/>
+            <field name="supplier_rank">15</field> <field name="street">Jalan Thamrin No. 12</field>
+            <field name="city">Surabaya</field>
+            <field name="zip">60281</field>
+            <field name="phone">+62319876543</field>
+            <field name="email">sales@kapasmurni.com</field>
+        </record>
+    </data>
+</odoo>
