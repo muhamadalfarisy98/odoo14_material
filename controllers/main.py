@@ -65,6 +65,9 @@ class MaterialController(http.Controller):
         try:
             data = request.jsonrequest
             
+            if 'material_buy_price' in data and data['material_buy_price'] < 100.0:
+                return {'error': 'Material Buy Price cannot be less than 100.', 'status_code' : 400,}
+
             # Basic validation for required fields
             required_fields = ['material_code', 'material_name', 'material_type', 'material_buy_price', 'supplier_id']
             if not all(field in data for field in required_fields):
@@ -114,6 +117,8 @@ class MaterialController(http.Controller):
                     }
             
             data = request.jsonrequest
+            if 'material_buy_price' in data and data['material_buy_price'] < 100.0:
+                return {'error': 'Material Buy Price cannot be less than 100.', 'status_code' : 400,}
 
             # Validate material_type if provided
             if 'material_type' in data:

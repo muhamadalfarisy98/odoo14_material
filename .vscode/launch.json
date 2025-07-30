@@ -12,9 +12,9 @@
             "args": [
                 "--config=/opt/odoo/config/odoo14.conf",
                 "--dev=all",
-                // "--test-enable",
-                // "-i", "odoo14_material",
-                // "--test-tags=material_unittest",
+                "--test-enable",
+                "-i", "odoo14_material",
+                "--test-tags=material_unittest",
 
 
                 // "--stop-after-init",

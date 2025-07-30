@@ -19,10 +19,6 @@ class Material(models.Model):
     supplier_id = fields.Many2one('res.partner', string='Related Supplier',
                                   domain=[('supplier_rank', '>', 0)], required=True)
 
-    _sql_constraints = [
-        ('material_code_unique', 'unique(material_code)', 'Material Code must be unique!'),
-    ]
-
     @api.constrains('material_buy_price')
     def _check_buy_price(self):
         for record in self:

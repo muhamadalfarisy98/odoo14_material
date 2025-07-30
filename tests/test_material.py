@@ -1,12 +1,28 @@
-from odoo.tests.common import TransactionCase,tagged
+from odoo.tests.common import TransactionCase,tagged, HttpCase
 from odoo.exceptions import ValidationError
 import json
-
+from urllib.request import Request
 
 @tagged('material_unittest')
-class TestMaterial(TransactionCase):
+class TestMaterial(HttpCase):
     def setUp(self, *args, **kwargs):
         super(TestMaterial, self).setUp(*args, **kwargs)
+        self.supplier = self.env['res.partner'].create({'name': 'Test Supplier for Material'})
+        self.material_to_update = self.env['material.material'].create({
+            'material_code': 'UPD001poo',
+            'material_name': 'Original Material',
+            'material_type': 'fabric',
+            'material_buy_price': 125.0,
+            'supplier_id': self.supplier.id,
+        })
+        self.material_jeans = self.env['material.material'].create({
+            'material_code': 'JNS001x',
+            'material_name': 'Jeans Material',
+            'material_type': 'jeans',
+            'material_buy_price': 150.0,
+            'supplier_id': self.supplier.id,
+        })
+        self.api_base_url = "http://localhost:8069"
 
         # Create a test supplier
         self.supplier = self.env['res.partner'].create({
@@ -60,19 +76,6 @@ class TestMaterial(TransactionCase):
                 'supplier_id': self.supplier.id,
             })
 
-    # def test_create_material_duplicate_code(self):
-    #     """ Test creating a material with a duplicate material code. """
-    #     with self.assertRaisesRegex(Exception, 'Material Code must be unique!'):
-    #         self.env['material.material'].create({
-    #             'material_code': 'FAB001', # Duplicate
-    #             'material_name': 'Another Fabric',
-    #             'material_type': 'fabric',
-    #             'material_buy_price': 180.0,
-    #             'supplier_id': self.supplier.id,
-    #         })
-            # Odoo 14 might raise this as a psycopg2.IntegrityError,
-            # which is an Exception, and the regex will match the constraint message.
-
     def test_update_material_valid(self):
         """ Test updating an existing material. """
         self.material_fabric.write({
@@ -97,126 +100,139 @@ class TestMaterial(TransactionCase):
 
 
     # # --- API Tests ---
+    def test_api_get_materials(self):
+        """ Test GET /api/materials """
+        url = '/api/materials'
+        response = self.url_open(url)
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.text)
+        self.assertIsInstance(data, list)
+        self.assertGreaterEqual(len(data), 2) 
 
-    # def test_api_get_materials(self):
-    #     """ Test GET /api/materials """
-    #     url = '/api/materials'
-    #     response = self.url_open(url)
-    #     self.assertEqual(response.status_code, 200)
-    #     data = json.loads(response.text)
-    #     self.assertIsInstance(data, list)
-    #     self.assertGreaterEqual(len(data), 2) # At least our two initial materials
+        # Test filter by type
+        response_fabric = self.url_open(url + '?material_type=fabric')
+        self.assertEqual(response_fabric.status_code, 200)
+        data_fabric = json.loads(response_fabric.text)
+        self.assertGreaterEqual(len(data_fabric), 1)
+        for material in data_fabric:
+            self.assertEqual(material['material_type'], 'fabric')
 
-    #     # Test filter by type
-    #     response_fabric = self.url_open(url + '?material_type=fabric')
-    #     self.assertEqual(response_fabric.status_code, 200)
-    #     data_fabric = json.loads(response_fabric.text)
-    #     self.assertGreaterEqual(len(data_fabric), 1)
-    #     for material in data_fabric:
-    #         self.assertEqual(material['material_type'], 'fabric')
+    def test_api_post_material_valid(self):
+        """ Test POST /api/materials with valid data. """
+        url = f'{self.api_base_url}/api/materials' 
+        post_data = {
+            'material_code': 'TEST001',
+            'material_name': 'Test Fabric API',
+            'material_type': 'fabric',
+            'material_buy_price': 125.0,
+            'supplier_id': self.supplier.id,
+        }
 
-    # def test_api_post_material_valid(self):
-    #     """ Test POST /api/materials with valid data. """
-    #     url = '/api/materials'
-    #     post_data = {
-    #         'material_code': 'TEST001',
-    #         'material_name': 'Test Fabric API',
-    #         'material_type': 'fabric',
-    #         'material_buy_price': 125.0,
-    #         'supplier_id': self.supplier.id,
-    #     }
-    #     response = self.url_json(url, post_data)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertIn('id', response.json())
-    #     self.assertIn('message', response.json())
-    #     self.assertEqual(response.json()['message'], 'Material created successfully!')
+        response = self.opener.post(url, json=post_data) 
+        
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        
+        self.assertIn('result', response_data)
+        result_data = response_data['result']
 
-    #     # Verify creation
-    #     created_material = self.env['material.material'].sudo().browse(response.json()['id'])
-    #     self.assertTrue(created_material.exists())
-    #     self.assertEqual(created_material.material_code, 'TEST001')
+        self.assertIn('id', result_data) 
+        self.assertIn('message', result_data) 
+        self.assertEqual(result_data['message'], 'Material created successfully!') 
 
-    # def test_api_post_material_invalid_buy_price(self):
-    #     """ Test POST /api/materials with buy_price < 100. """
-    #     url = '/api/materials'
-    #     post_data = {
-    #         'material_code': 'BAD001',
-    #         'material_name': 'Bad Price',
-    #         'material_type': 'cotton',
-    #         'material_buy_price': 90.0, # Invalid
-    #         'supplier_id': self.supplier.id,
-    #     }
-    #     response = self.url_json(url, post_data)
-    #     self.assertEqual(response.status_code, 400) # Expecting bad request
-    #     self.assertIn('error', response.json())
-    #     self.assertIn('Material Buy Price cannot be less than 100.', response.json()['error'])
+        # Verify creation
+        created_material = self.env['material.material'].sudo().browse(result_data['id']) 
+        self.assertTrue(created_material.exists())
+        self.assertEqual(created_material.material_code, 'TEST001')
 
-    # def test_api_post_material_duplicate_code(self):
-    #     """ Test POST /api/materials with duplicate material_code. """
-    #     url = '/api/materials'
-    #     post_data = {
-    #         'material_code': 'FAB001', # Duplicate of existing
-    #         'material_name': 'Duplicate Test',
-    #         'material_type': 'fabric',
-    #         'material_buy_price': 110.0,
-    #         'supplier_id': self.supplier.id,
-    #     }
-    #     response = self.url_json(url, post_data)
-    #     self.assertEqual(response.status_code, 409) # Expecting Conflict
-    #     self.assertIn('error', response.json())
-    #     self.assertIn('Material Code must be unique!', response.json()['error'])
+    def test_api_post_material_invalid_buy_price(self):
+        """ Test POST /api/materials with buy_price < 100. """
+        url = f'{self.api_base_url}/api/materials' 
+        post_data = {
+            'material_code': 'BAD001',
+            'material_name': 'Bad Price',
+            'material_type': 'cotton',
+            'material_buy_price': 90.0,
+            'supplier_id': self.supplier.id,
+        }
+        
+        response = self.opener.post(url, json=post_data) 
+
+        response_data = response.json() 
 
 
-    # def test_api_put_material_valid(self):
-    #     """ Test PUT /api/materials/<id> with valid data. """
-    #     url = f'/api/materials/{self.material_fabric.id}'
-    #     put_data = {
-    #         'material_name': 'Updated Fabric API',
-    #         'material_buy_price': 190.0,
-    #     }
-    #     response = self.url_json(url, put_data)
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertIn('message', response.json())
-    #     self.assertEqual(response.json()['message'], 'Material updated successfully!')
+        self.assertIn('result', response_data)
+        result_content = response_data['result']
+        self.assertEqual(result_content['status_code'], 400) 
 
-    #     # Verify update
-    #     self.material_fabric.invalidate_cache() # Clear cache to get fresh data
-    #     self.assertEqual(self.material_fabric.material_name, 'Updated Fabric API')
-    #     self.assertEqual(self.material_fabric.material_buy_price, 190.0)
+        created_material = self.env['material.material'].sudo().search([('material_code', '=', 'BAD001')])
+        self.assertFalse(created_material, "Material with invalid price should not have been created")
+    
+    def test_api_put_material_valid(self):
+        """ Test PUT /api/materials/<id> with valid data. """
+        updated_data = {
+            'material_name': 'Original Material',
+            'material_buy_price': 125.0,
+            'material_type': 'cotton',
+        }
+        
+        material_id = self.material_to_update.id
 
-    # def test_api_put_material_invalid_buy_price(self):
-    #     """ Test PUT /api/materials/<id> with buy_price < 100. """
-    #     url = f'/api/materials/{self.material_jeans.id}'
-    #     put_data = {
-    #         'material_buy_price': 80.0, # Invalid
-    #     }
-    #     response = self.url_json(url, put_data)
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertIn('error', response.json())
-    #     self.assertIn('Material Buy Price cannot be less than 100.', response.json()['error'])
+        url = f'{self.api_base_url}/api/materials/{material_id}' 
 
-    # def test_api_delete_material(self):
-    #     """ Test DELETE /api/materials/<id>. """
-    #     material_to_delete = self.env['material.material'].create({
-    #         'material_code': 'DEL001',
-    #         'material_name': 'Material to Delete',
-    #         'material_type': 'cotton',
-    #         'material_buy_price': 110.0,
-    #         'supplier_id': self.supplier.id,
-    #     })
-    #     url = f'/api/materials/{material_to_delete.id}'
-    #     response = self.url_open(url, method='DELETE')
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertIn('message', json.loads(response.text))
-    #     self.assertEqual(json.loads(response.text)['message'], 'Material deleted successfully!')
+        response = self.opener.put(url, json=updated_data) 
+    
+        self.assertEqual(response.status_code, 200)
+        
+        response_data = response.json() 
+        
+        self.assertIn('result', response_data)
+        result_data = response_data['result']
 
-    #     # Verify deletion
-    #     self.assertFalse(material_to_delete.exists())
+        self.assertIn('message', result_data) 
+        self.assertEqual(result_data['message'], 'Material updated successfully!')
 
-    # def test_api_delete_material_not_found(self):
-    #     """ Test DELETE /api/materials/<id> for non-existent ID. """
-    #     url = '/api/materials/999999' # Non-existent ID
-    #     response = self.url_open(url, method='DELETE')
-    #     self.assertEqual(response.status_code, 404)
-    #     self.assertIn('error', json.loads(response.text))
-    #     self.assertEqual(json.loads(response.text)['error'], 'Material not found.')
+    def test_api_put_material_invalid_buy_price(self):
+        """ Test PUT /api/materials/<id> with buy_price < 100. """
+        url = f'{self.api_base_url}/api/materials/{self.material_jeans.id}' 
+        
+        put_data = {
+            'material_buy_price': 80.0,
+        }
+        
+        response = self.opener.put(url, json=put_data) 
+        response_data = response.json() 
+        self.assertIn('result', response_data)
+
+        result_content = response_data['result']
+        self.assertEqual(result_content['status_code'], 400) 
+        self.assertIn('Material Buy Price cannot be less than 100.', result_content['error'])
+
+    def test_api_delete_material(self):
+        """ Test DELETE /api/materials/<id>. """
+        material_to_delete = self.env['material.material'].create({
+            'material_code': 'DEL001',
+            'material_name': 'Material to Delete',
+            'material_type': 'cotton',
+            'material_buy_price': 110.0,
+            'supplier_id': self.supplier.id,
+        })
+        url = f'{self.api_base_url}/api/materials/{material_to_delete.id}'
+        
+        response = self.opener.delete(url) 
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_api_delete_material_not_found(self):
+        """ Test DELETE /api/materials/<id> for non-existent ID. """
+        url = f'{self.api_base_url}/api/materials/999999' 
+        
+        response = self.opener.delete(url) 
+
+        self.assertEqual(response.status_code, 404)
+        
+        response_data = response.json() 
+        
+        self.assertIn('error', response_data) 
+        error_details = response_data['error']
+        self.assertEqual(error_details, 'Material not found.')
