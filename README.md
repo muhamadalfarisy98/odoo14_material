@@ -88,6 +88,22 @@ explaination : in odoo V14, if a record of res.partner ever has created an PO, t
     "supplier_id": 26
   }'`
 
+
+```bash
+curl --location 'http://localhost:8069/api/materials' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Basic YWRtaW46YWRtaW4=' \
+--header 'Cookie: session_id=5a76c0b1914215f2dbedce53a28c918a5408f25c' \
+--data '{
+    "material_code": "fczsdcxcz",
+    "material_name": "zxczzxc",
+    "material_type": "fabric",
+    "material_buy_price": 170.0,
+    "supplier_id": 26
+  }'
+
+```
+
 <img width="1039" height="686" alt="image" src="https://github.com/user-attachments/assets/8f68a63f-548d-48a5-9dd4-68c3353179f1" />
 
 
