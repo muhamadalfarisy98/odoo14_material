@@ -4,6 +4,9 @@ Module for registering and managing materials
 ## developer
 muhamadalfarisy98@gmail.com
 
+<img width="1724" height="547" alt="image" src="https://github.com/user-attachments/assets/5821d7e9-8f31-4606-a206-708e5d4503b6" />
+
+
 ## How to?
 ```bash
 #run unit test
