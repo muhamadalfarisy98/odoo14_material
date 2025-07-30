@@ -76,19 +76,6 @@ explaination : in odoo V14, if a record of res.partner ever has created an PO, t
 ## [2] Add Materials
 1. success
 
-`curl --location 'http://localhost:8069/api/materials' \
---header 'Content-Type: application/json' \
---header 'Authorization: Basic YWRtaW46YWRtaW4=' \
---header 'Cookie: session_id=5a76c0b1914215f2dbedce53a28c918a5408f25c' \
---data '{
-    "material_code": "fczsdcxcz",
-    "material_name": "zxczzxc",
-    "material_type": "fabric",
-    "material_buy_price": 170.0,
-    "supplier_id": 26
-  }'`
-
-
 ```bash
 curl --location 'http://localhost:8069/api/materials' \
 --header 'Content-Type: application/json' \
@@ -109,7 +96,8 @@ curl --location 'http://localhost:8069/api/materials' \
 
 2. less than 100
 
-`curl --location 'http://localhost:8069/api/materials' \
+```bash
+curl --location 'http://localhost:8069/api/materials' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Basic YWRtaW46YWRtaW4=' \
 --header 'Cookie: session_id=5a76c0b1914215f2dbedce53a28c918a5408f25c' \
@@ -119,7 +107,8 @@ curl --location 'http://localhost:8069/api/materials' \
     "material_type": "fabric",
     "material_buy_price": 70.0,
     "supplier_id": 26
-  }'`
+  }'
+```
 
 
 <img width="1026" height="735" alt="image" src="https://github.com/user-attachments/assets/90c009d3-f475-4feb-a0f2-3c5c26ea8529" />
@@ -142,7 +131,7 @@ curl --location 'http://localhost:8069/api/materials' \
 ## [4] Update Materials
 1. success
 
-`
+```bash
 curl --location --request PUT 'http://localhost:8069/api/materials/1969' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Basic YWRtaW46YWRtaW4=' \
@@ -150,7 +139,8 @@ curl --location --request PUT 'http://localhost:8069/api/materials/1969' \
 --data '{
     "material_type": "fabric",
     "material_buy_price": 250
-  }'`
+  }'
+```
 
 <img width="1137" height="713" alt="image" src="https://github.com/user-attachments/assets/d2722fa0-46ed-41c7-ba18-35fecbed9924" />
 
