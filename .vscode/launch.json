@@ -12,14 +12,14 @@
             "args": [
                 "--config=/opt/odoo/config/odoo14.conf",
                 "--dev=all",
-                "--test-enable",
-                "-i", "odoo14_material",
-                "--test-tags=material_unittest",
+                // "--test-enable",
+                // "-i", "odoo14_material",
+                // "--test-tags=material_unittest",
 
+                // "--db-filter=db_test_clean" 
 
                 // "--stop-after-init",
                 // "--update=odoo14_material",
-                // "--db-filter=odoo14.*"
             ]
         }
     ]
